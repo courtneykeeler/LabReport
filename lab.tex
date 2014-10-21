@@ -83,7 +83,10 @@ The basic requirements for ECG circuitry are high input impedance, high gain for
 \end{center}
 \end{figure}
 
+The first stage of the circuit, the instrumentation amplifier, was designed to have a gain of XX. %did we record this value anywhere or should be take it from the modelsim?
+In total, the gain of the ECG amplifier should be 1750. However, it is bad practice to apply all of the gain at a single amplification stage, so for this reason the gain is spread between the three main stages. As Figure \ref{fig:circuit} indicates, the feedback resistors for the voltage followers are equal in value, and related to $R_1$ such that %equation.....
 
+The values of $R_{in}$ should be chosen such that the input impedance of the ECG amplifier circuit is sufficiently high. However, if these values are too large, the 
 High input impedance but we use 100k because else the signal disappears
 
 \subsection{AC Analysis}
@@ -141,6 +144,10 @@ High input impedance but we use 100k because else the signal disappears
 \end{figure}
 
 \section{Device Limitations}
+
+Motion artifact
+Using more electrodes for a better picture of heart's activity
+Can't see the whole pqrst complex here, can only figure out BPM from the peaks
 
 \begin{thebibliography}{1}
 

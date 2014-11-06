@@ -82,18 +82,18 @@ The basic requirements for ECG circuitry are high input impedance, high gain for
     \hline
     Label & Value \\ \hline
     $R_{in}$ & 100 k$\Omega$ \\ \hline
-    $R_1$ & 11C \\ \hline
-    $R_2$ & 9C  \\ \hline
-    $R_3$ & 10C  \\ \hline
-    $R_4$ & 11C \\ \hline
-    $R_5$ & 9C  \\ \hline
-    $R_6$ & 10C  \\ \hline
-    $R_7$ & 11C \\ \hline
-    $R_8$ & 9C  \\ \hline
-    $R_9$ & 10C  \\ \hline
-    $C_1$ & 11C \\ \hline
-    $C_2$ & 9C  \\ \hline
-    $C_3$ & 10C  \\
+    $R_1$ & 1.2 k$\Omega$ \\ \hline
+    $R_2$ & 22 k$\Omega$  \\ \hline
+    $R_3$ & 1 k$\Omega$  \\ \hline
+    $R_4$ & 22 k$\Omega$ \\ \hline
+    $R_5$ & 3.3 M$\Omega$  \\ \hline
+    $R_6$ & 10 k$\Omega$  \\ \hline
+    $R_7$ & 10 k$\Omega$ \\ \hline
+    $R_8$ & 10 k$\Omega$  \\ \hline
+    $R_9$ & 10 k$\Omega$  \\ \hline
+    $C_1$ & 1 $\mu$F \\ \hline
+    $C_2$ & 150 nF  \\ \hline
+    $C_3$ & 68 nF  \\
     \hline
     \end{tabular}
     \caption{Final component values for the ECG amplifier circuit.}
@@ -105,26 +105,61 @@ The basic requirements for ECG circuitry are high input impedance, high gain for
 \begin{figure}[H]
 \begin{center}
 \includegraphics[scale=.35]{ECG_circuit.png}
-\caption{Schematic of the circuitry used to amplify ECG signals in the laboratory.}
+\caption{Schematic of the circuitry used to amplify ECG signals in the laboratory. In the constructed circuit, there is a unity gain non-inverting voltage follower between the instrumentation amplifier and the first filter. This is because the op amp ICs come in pairs of two, so the circuit must have an even number of op amps (not including the isolation amplifier).}
 \label{fig:circuit}
 \end{center}
 \end{figure}
 
-In total, the gain of the ECG amplifier should be 1750. However, it is bad practice to apply all of the gain at a single amplification stage, so for this reason the gain is spread between the three main stages. The first stage of the circuit, the instrumentation amplifier, was designed to have the following gain:
+In total, the gain of the ECG amplifier should be 1750. However, it is bad practice to apply all of the gain at a single amplification stage, so for this reason the gain is spread between the entire instrumentation amplifier and high pass filter. The first stage of the circuit, the instrumentation amplifier, was designed to have the following gain:
 $$
 G_1 = \frac{2R_2+R_1}{R_1}(\frac{R_4}{R_3})
 $$
 $$
-G_1 = \frac{2(a)+b}{b}(\frac{c}{d}) = x.
+G_1 = \frac{2(22k)+1.2k}{1.2k}(\frac{22k}{1k}) = 828.67.
 $$
-The second stage of the circuit, the high pass filter,  was designed to have a gain of XX. This is determined by the following equation:
+The gain of the second stage of the circuit, the high pass filter,  was designed by the following equation:
 $$
-G_2 = R.
+G_2 = 1 + \frac{R_7}{R_6}
 $$
-The final stage of the circuit, the Sallen-Key low pass filter, was designed to have a gain of XX. This is set by the equation
 $$
-G_3 = R.
+G_2 = 1 + \frac{10k}{10k} = 2.
 $$
+This gives a total gain of
+$$
+G_{total} = (G_1)(G_2) = (828.67)(2) = 1657.34.
+$$
+
+The final stage of the circuit, the Sallen-Key low pass filter, was designed for unity gain. However, special consideration had to be given to the component values in order to create Butterworth behavior. This means that the magnitude of the frequency response for the pass band is flat. A second order Butterworth filter in particular has a maximally flat passband. For the Sallen-Key filter in the ECG circuit, the following change of variables is made:
+$$
+R_8 = mR
+$$
+$$
+R_9 = R
+$$
+$$
+C_2 = mC
+$$
+$$
+C_3 = C.
+$$
+The following variables are also defined:
+$$
+Q = \frac{\sqrt{mn}}{m+1}
+$$
+$$
+\omega_0 = 2\pi f_0 = \frac{1}{RC\sqrt{mn}}.
+$$
+For a second order Butterworth, $Q = 1/\sqrt{2}$. It is also desired for the ECG application that $f_0 = 200$ Hz. Even with this information, there are too many variables to solve for both capacitor and both resistor values. Therefore, it is arbitrarily chosen that $m=1$, which implies $R_8 = R_9$. The choice of resistance value is again arbitrary, and here set as 10 k$\Omega$. Now the capacitance values can be solved for:
+$$
+\frac{1}{\sqrt{2}} = \frac{\sqrt{n}}{2} \rightarrow n = 2
+$$
+$$
+2\pi 200 = \frac{1}{(10k)C(\frac{2}{\sqrt{2}})} \rightarrow C = C_3 = .0563 \mu F
+$$
+$$
+C_2 = nC = .1126 \mu F.
+$$
+In practice, these values for the high pass capacitors were rounded to the closes standard values. The values that were used in the constructed circuit can be seen in Table \ref{table:values}.
 
 In theory, the values of $R_{in}$ should be chosen such that the input impedance of the ECG amplifier circuit is sufficiently high. However, in practice if these values are too large, there is no signal seen at the output of the $R_{in}$ resistors. This is the reason for the value of 100 k$\Omega$ seen in Table \ref{table:values}.
 
@@ -145,7 +180,7 @@ First, the DM signals were investigated. It is desired to have a large DM signal
 \begin{figure}[H]
 \begin{center}
 \includegraphics[scale=.35]{DM_analysis.png}
-\caption{AC analysis of the simulated ECG amplifier circuit in DM measurement configuration. Notice the flat top of the magnitude spectrum. This is due to the use of a Sallen-Key filter.}
+\caption{AC analysis of the simulated ECG amplifier circuit in DM measurement configuration. Notice the flat top of the magnitude spectrum. This is due to the use of a second order Butterworth filter.}
 \label{fig:DM}
 \end{center}
 \end{figure}

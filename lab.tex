@@ -175,7 +175,7 @@ The final ECG circuit was simulated in two configurations in order to observe th
 \end{center}
 \end{figure}
 
-First, the DM signals were investigated. It is desired to have a large DM signal gain; the previous section demonstrated that the gain of the ECG amplifier circuit should be XX. Figure \ref{fig:DM} shows the response of the circuit for a range of relevant frequencies. 
+First, the DM signals were investigated. It is desired to have a large DM signal gain; the previous section demonstrated that the gain of the ECG amplifier circuit should be just over 1600. Figure \ref{fig:DM} shows the response of the circuit for a range of relevant frequencies. 
 
 \begin{figure}[H]
 \begin{center}
@@ -213,6 +213,12 @@ According to Figure \ref{fig:3DB}, the lower corner frequency occurs at .049 Hz 
 
 \section{Construction and Data Acquisition}
 
+After approving a schematic of the component placement, the ECG amplifier was soldered onto a permanent Vero board. The circuit was built with a TL072 (operational amplifier), ISO124 (isolation amplifier), resistances, capacitances, 9V batteries and connectors. The NI Elvis platform is used as an oscilloscope and digital multi meter. It was also used to check the proper functioning of each component i.e. the operational amplifiers, filters and isolation amplifier by generating a known signal (10 mV, 30Hz) and observing the output across each component. 
+
+Before the amplifier could be used to measure cardiac bio-potentials; the DC offset, gain, DM signal and CM signal needed to be measured. The DM and CM signal gains were measured for a range of frequencies using the NI Elvis platform to both generate a known signal and measure the resulting signal at the output of the Butterworth filter (the isolation amplifier was only connected to the circuit when it was used to measure the ECG signal of a patient). The DC offset was also measured using the same NI Elvis platform with the circuit in the DM measurement configuration. 
+   
+Once the correct functionality of each functional block and relevant parameters were verified, it was decided to move towards acquisition of ECG bio-potentials. The amplifier has three input electrodes that were connected to the volunteer as shown in Figure \ref{fig:setup}. The positive electrode was placed near the dipole of the heart while the negative electrode was placed further away but at same vertical height as the positive electrode. The third electrode served as ground and was placed on the hip. The outputs of the isolation amplifier were connected to a digital to analog converter (DAC) and the ECG waveform was consequently visualized on the computer through a LABVIEW program.
+
 \begin{figure}[H]
 \begin{center}
 \includegraphics[scale=.5]{setup.png}
@@ -223,25 +229,48 @@ According to Figure \ref{fig:3DB}, the lower corner frequency occurs at .049 Hz 
 
 \section{Results}
 
+The measured gains for the DM and CM configuration over a range of relevant frequencies should in theory match the magnitude plots seen in Figures \ref{fig:DM} and \ref{fig:CM}. In reality, there are sources of noise and tolerances on components that cause deviations in the actual values from those expected. Figure \ref{fig:DM_response} shows the amplification of DM signals over the relevant frequency range.
 \begin{figure}[H]
 \begin{center}
-\includegraphics[scale=.4]{ECG_real.png}
-\caption{Captured waveform from the ECG amplifier circuit when hooked up to electrodes placed on a patient.}
+\includegraphics[scale=.5]{fig1.png}
+\caption{Frequency response of the constructed ECG amplifier in DM mode.}
+\label{fig:DM_response}
+\end{center}
+\end{figure}
+Notice that the passband region is not flat, as was desired by designing the low pass filter as a second order Butterworth. This is an example of the difference between a simulated and physically realized circuit. However, the overall shape still matches the expected value, and the maximum amplification of 1822 matches the expected value of 1657 relatively well. 
+
+Further, the frequency response of the CM configuration, as seen in Figure \ref{fig:CM_response}, matches the expected values for the small range that could be measured in lab.
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=.5]{fig2.png}
+\caption{Frequency response of the constructed ECG amplifier in CM mode.}
+\label{fig:CM_response}
+\end{center}
+\end{figure}
+In practice, it was very difficult to produce a large enough amplitude signal that generate an output signal discernible from 50 Hz power line distortion while the ECG circuit was in the CM configuration. For this reason, only a small range of frequency values could be measured for the actual frequency response. It can be seen that the actual maximum CM amplification value, 0.08, is higher than the simulated value, .00125. This is because the simulation is a best case scenario for the performance of the circuit.
+
+With real values of DM and CM gain from the constructed circuit, it is possible to calculate the real CMRR, as below:
+$$
+CMRR = \frac{A_{DM}}{A_{CM}} = \frac{1822}{.08} = 22775.
+$$
+Here it can be seen that what seems like a 'fairly close' agreement in CM amplification values can lead to a very large decrease in the quality of the CMRR. However, the constructed circuit will still function to acquire ECG signals, albeit with a lower signal to noise ratio.
+
+The DC offset was found to be 0 when the input offset was 0. However, when the input offset was changed to a positive value an rise in output offset was noticed. However, this offset settled back down to 0 within several seconds. This behavior can be reasoned with the presence of capacitors in the circuit. 
+
+A three lead ECG consist of five points; P wave, QRS complex, T. In the captured ECG waveform, the P wave and the QRS complex are clearly distinguished, as highlighted in Figure \ref{fig:ECG}. To smooth the signal a notch filter of 50 Hz was applied through LABVIEW. 
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=.6]{pqrst.png}
+\caption{Captured and filtered waveform from the ECG amplifier circuit when hooked up to electrodes placed on a patient.}
 \label{fig:ECG}
 \end{center}
 \end{figure}
+The ST segment and the T wave of the ECG waveform are also present but are distorted due noise. This distortion in the signal comes from a variety of sources which include power line distortion and motion artifacts.
 
 \section{Device Limitations}
 
-Motion artifact
-Using more electrodes for a better picture of heart's activity
-Can't see the whole pqrst complex here, can only figure out BPM from the peaks
+The foremost limitation of the built amplifier is its inability to clearly differentiate the ST segment and the T wave. In the current circuit, the only biometric that can be determined is the beats per minute (BPM), found by examining the separation in time of subsequent QRS peaks. For some simple applications this is the only result of interest, and the circuit presented in this lab would be adequate. However, if more information is needed on the complete P,QRS,T waves, then the noise and power distortion will need to be better handled. This could be done through means such as shielding the device and electrodes. Another source of noise is motion artifact, which the current amplifier design is susceptible to. Motion artifact could be minimized by designing a device with shorter leads, or by asking the patient to lie down in a relaxed position while the measurements are being taken.
 
-\begin{thebibliography}{1}
-
-\bibitem{webster}
-Webster, John G. Medical Instrumentation Application and Design, 4th Edition. John Wiley \& Sons, 092008. VitalBook file.
-
-\end{thebibliography}
+Three electrodes is also the minimum number of electrodes needed to detect cardiac bio-potentials. In order to acquire a more complete picture of the electrical activity of different regions of the heart, the number of electrodes detecting the cardiac bio-potentials must be increased.
 
 \end{document}
